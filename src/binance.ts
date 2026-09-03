@@ -50,7 +50,7 @@ const CALLBACK_PORT = 8976;
  */
 const CLIENT_ID_URL =
   process.env.COWRIE_CLIENT_ID_URL ??
-  "https://raw.githubusercontent.com/cowrie-agent/cowrie/main/client-metadata.json";
+  "https://raw.githubusercontent.com/frankolien/cowrie/main/client-metadata.json";
 
 interface Cached {
   tokens?: OAuthTokens;
@@ -103,7 +103,7 @@ class FileTokenProvider implements OAuthClientProvider {
   get clientMetadata(): OAuthClientMetadata {
     return {
       client_name: "Cowrie",
-      client_uri: "https://github.com/cowrie-agent/cowrie",
+      client_uri: "https://github.com/frankolien/cowrie",
       redirect_uris: [this.redirectUrl],
       grant_types: ["authorization_code", "refresh_token"],
       response_types: ["code"],
