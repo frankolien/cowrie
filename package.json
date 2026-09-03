@@ -1,0 +1,36 @@
+{
+  "name": "cowrie",
+  "version": "0.1.0",
+  "description": "An agent that can buy from any x402 service, on any rail, with a budget you set.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.6"
+  },
+  "bin": {
+    "cowrie-mcp": "src/mcp.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "tsc",
+    "discover": "node src/discover.ts",
+    "buy": "node src/index.ts",
+    "receipts": "node src/receipts.ts",
+    "quote": "node src/quote.ts",
+    "mcp": "node src/mcp.ts",
+    "workflow": "node src/workflow.ts",
+    "binance": "node src/binance.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "@x402/evm": "^2.24.0",
+    "@x402/fetch": "^2.24.0",
+    "viem": "^2.56.3",
+    "x402": "^1.2.0",
+    "zod": "^4.5.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0"
+  },
+  "license": "MIT"
+}
