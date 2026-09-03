@@ -223,20 +223,26 @@ export async function login(): Promise<void> {
     authProvider: provider,
   });
 
+  let connectError: unknown;
   try {
     await client.connect(transport);
     console.log("Already authorised — Binance Agent OS is connected.");
     await client.close();
     return;
-  } catch {
-    // Expected on first run: connect throws UnauthorizedError after stashing the auth URL.
+  } catch (err) {
+    // On the first run this is the expected UnauthorizedError, thrown *after* the provider has
+    // been handed the authorisation URL. Anything else is a real failure and must not be silent —
+    // swallowing it turns a network or metadata problem into a misleading "no URL produced".
+    connectError = err;
   }
 
   if (!authUrl) {
+    const detail = connectError instanceof Error ? connectError.message : String(connectError);
     throw new Error(
-      "No authorisation URL was produced. Check that COWRIE_CLIENT_ID_URL points at a public " +
-        "HTTPS copy of client-metadata.json — Binance uses Client ID Metadata Documents and does " +
-        "not support dynamic client registration.",
+      `No authorisation URL was produced.\n\nUnderlying error: ${detail}\n\n` +
+        `client_id in use: ${CLIENT_ID_URL}\n` +
+        "That URL must be a public HTTPS copy of client-metadata.json — Binance uses Client ID " +
+        "Metadata Documents and supports no dynamic client registration.",
     );
   }
 
