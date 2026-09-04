@@ -136,6 +136,19 @@ export function cheapestPayable(
     .sort((a, b) => (a.minPriceUsd ?? 0) - (b.minPriceUsd ?? 0))[0];
 }
 
+/** Ecosystem-wide service counts per network, independent of any category filter. */
+export async function networkTotals(): Promise<Map<string, number>> {
+  const res = await fetch(`${X402_LIST_API}/networks`, { headers: { accept: "application/json" } });
+  if (!res.ok) return new Map();
+  const body = (await res.json()) as {
+    data?: { name?: string; service_count?: number; is_mainnet?: boolean }[];
+  };
+  const rows = (body.data ?? [])
+    .filter((n) => n.is_mainnet && (n.service_count ?? 0) > 0)
+    .sort((a, b) => (b.service_count ?? 0) - (a.service_count ?? 0));
+  return new Map(rows.map((n) => [n.name ?? "?", n.service_count ?? 0]));
+}
+
 /** Cheapest service that speaks the OpenAI chat API and settles on a rail we can pay. */
 export function cheapestInference(
   services: DiscoveredService[],

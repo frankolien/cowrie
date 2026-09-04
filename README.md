@@ -13,13 +13,13 @@ Binance shipped an x402 facilitator on BNB Chain in July 2026. We went looking f
 agent could buy with it, and measured the whole market:
 
 ```
-Rail coverage across 659 live x402 services
-    623  Base
-    225  Solana
-     57  Polygon
-     40  Arbitrum One
-     10  Avalanche
-      0  BNB Chain   <- Binance's own x402 rail
+Rail coverage — every category
+   624  Base
+   227  Solana
+    57  Polygon
+    41  Arbitrum One
+    10  Avalanche
+     0  BNB Chain   <- Binance's own x402 rail
 ```
 
 **Zero.** BNB Chain does not appear in x402's default-asset tables, has no entry in the service

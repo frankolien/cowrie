@@ -108,13 +108,22 @@ node src/index.ts --list
 Let it scroll. **Hold on the last line for a full second.**
 
 ```
-Rail coverage:
+Rail coverage — in "AI":
     29  Base
      6  Solana
-     2  Arbitrum One
-     1  Polygon
+     ...
+
+Rail coverage — every category (959 listings):
+   624  Base
+   227  Solana
+    57  Polygon
+    41  Arbitrum One
+    10  Avalanche
      0  BNB Chain   <- Binance's own x402 rail
 ```
+
+The command prints two tables: the category you searched, and the whole directory. **The second one
+is the shot** — it's the number quoted in the written submission.
 
 > Binance shipped an x402 payment rail on BNB Chain in July. I went looking for what an Agent OS
 > agent could actually buy with it. Six hundred and fifty-nine services accept x402 today. Zero of

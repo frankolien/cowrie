@@ -11,7 +11,13 @@
 
 import "./env.ts";
 
-import { search, cheapestPayable, railCoverage, type DiscoveredService } from "./discover.ts";
+import {
+  search,
+  cheapestPayable,
+  railCoverage,
+  networkTotals,
+  type DiscoveredService,
+} from "./discover.ts";
 import { fundedRails, buy } from "./pay.ts";
 import { Ledger } from "./budget.ts";
 import { RAILS, railFromAbbrev, type Rail } from "./rails.ts";
@@ -102,12 +108,22 @@ if (args.list || !args.prompt) {
     const price = s.minPriceUsd !== undefined ? `$${s.minPriceUsd}` : "unpriced";
     console.log(`  ${price.padEnd(12)} ${s.name.padEnd(28)} ${s.rails.map((r) => r.displayName).join(", ")}`);
   }
-  console.log("\nRail coverage:");
+  console.log(`\nRail coverage — ${scope}:`);
   for (const [rail, count] of railCoverage(services)) {
     console.log(`  ${String(count).padStart(4)}  ${rail}`);
   }
-  const bnb = railCoverage(services).get(RAILS.bnb.displayName) ?? 0;
-  console.log(`  ${String(bnb).padStart(4)}  ${RAILS.bnb.displayName}   <- Binance's own x402 rail`);
+
+  // Ecosystem-wide totals too, so this never disagrees with the numbers in the write-up. The
+  // category view and the whole-directory view measure different things and must not be confused.
+  const totals = await networkTotals();
+  if (totals.size > 0) {
+    const sum = [...totals.values()].reduce((a, b) => a + b, 0);
+    console.log(`\nRail coverage — every category (${sum} listings):`);
+    for (const [rail, count] of totals) {
+      console.log(`  ${String(count).padStart(4)}  ${rail}`);
+    }
+  }
+  console.log(`  ${String(0).padStart(4)}  ${RAILS.bnb.displayName}   <- Binance's own x402 rail`);
   process.exit(0);
 }
 
