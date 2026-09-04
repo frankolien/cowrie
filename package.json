@@ -18,7 +18,8 @@
     "quote": "node src/quote.ts",
     "mcp": "node src/mcp.ts",
     "workflow": "node src/workflow.ts",
-    "binance": "node src/binance.ts"
+    "binance": "node src/binance.ts",
+    "preflight": "node src/preflight.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.30.0",

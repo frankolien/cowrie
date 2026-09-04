@@ -16,6 +16,16 @@ git clone <repo> cowrie && cd cowrie
 npm install
 ```
 
+## 1b. Check the machine is ready
+
+```bash
+node src/preflight.ts
+```
+
+Verifies Node version, dependencies, network, wallet and receipts, then either says `Ready` or names
+the blocker and its fix. Useful before a demo, and the fastest way to diagnose a machine that is not
+behaving.
+
 ## 2. See what the agent can buy
 
 ```bash
