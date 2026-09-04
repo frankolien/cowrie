@@ -13,7 +13,7 @@ Binance shipped an x402 facilitator on BNB Chain in July 2026. We went looking f
 agent could buy with it, and measured the whole market:
 
 ```
-Rail coverage — every category
+Rail coverage — all 659 live x402 services
    624  Base
    227  Solana
     57  Polygon

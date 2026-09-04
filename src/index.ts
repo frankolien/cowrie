@@ -115,11 +115,10 @@ if (args.list || !args.prompt) {
 
   // Ecosystem-wide totals too, so this never disagrees with the numbers in the write-up. The
   // category view and the whole-directory view measure different things and must not be confused.
-  const totals = await networkTotals();
-  if (totals.size > 0) {
-    const sum = [...totals.values()].reduce((a, b) => a + b, 0);
-    console.log(`\nRail coverage — every category (${sum} listings):`);
-    for (const [rail, count] of totals) {
+  const { perRail, totalServices } = await networkTotals();
+  if (perRail.size > 0) {
+    console.log(`\nRail coverage — all ${totalServices} live x402 services:`);
+    for (const [rail, count] of perRail) {
       console.log(`  ${String(count).padStart(4)}  ${rail}`);
     }
   }

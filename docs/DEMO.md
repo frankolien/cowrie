@@ -113,7 +113,7 @@ Rail coverage — in "AI":
      6  Solana
      ...
 
-Rail coverage — every category (959 listings):
+Rail coverage — all 659 live x402 services:
    624  Base
    227  Solana
     57  Polygon

@@ -136,17 +136,33 @@ export function cheapestPayable(
     .sort((a, b) => (a.minPriceUsd ?? 0) - (b.minPriceUsd ?? 0))[0];
 }
 
-/** Ecosystem-wide service counts per network, independent of any category filter. */
-export async function networkTotals(): Promise<Map<string, number>> {
-  const res = await fetch(`${X402_LIST_API}/networks`, { headers: { accept: "application/json" } });
-  if (!res.ok) return new Map();
-  const body = (await res.json()) as {
+/**
+ * Ecosystem-wide service counts per network, independent of any category filter.
+ *
+ * These sum higher than the directory's total service count: a service that accepts payment on
+ * four chains appears under all four. Report both numbers or the two look like a contradiction.
+ */
+export async function networkTotals(): Promise<{ perRail: Map<string, number>; totalServices: number }> {
+  const [netRes, statRes] = await Promise.all([
+    fetch(`${X402_LIST_API}/networks`, { headers: { accept: "application/json" } }),
+    fetch(`${X402_LIST_API}/stats`, { headers: { accept: "application/json" } }),
+  ]);
+  if (!netRes.ok) return { perRail: new Map(), totalServices: 0 };
+
+  const body = (await netRes.json()) as {
     data?: { name?: string; service_count?: number; is_mainnet?: boolean }[];
   };
   const rows = (body.data ?? [])
     .filter((n) => n.is_mainnet && (n.service_count ?? 0) > 0)
     .sort((a, b) => (b.service_count ?? 0) - (a.service_count ?? 0));
-  return new Map(rows.map((n) => [n.name ?? "?", n.service_count ?? 0]));
+
+  let totalServices = 0;
+  if (statRes.ok) {
+    const stats = (await statRes.json()) as { data?: { total_services?: number } };
+    totalServices = stats.data?.total_services ?? 0;
+  }
+
+  return { perRail: new Map(rows.map((n) => [n.name ?? "?", n.service_count ?? 0])), totalServices };
 }
 
 /** Cheapest service that speaks the OpenAI chat API and settles on a rail we can pay. */
