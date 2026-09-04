@@ -101,6 +101,8 @@ No build step. No bundler. Node 22.6+ runs the TypeScript directly.
 Full walkthrough — including proving the payment path **for free on testnet**:
 **[docs/REPLICATE.md](docs/REPLICATE.md)**
 
+Recording the demo video: **[docs/DEMO.md](docs/DEMO.md)** — self-contained setup and shot list.
+
 ## As an MCP server
 
 ```bash
