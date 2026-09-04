@@ -1,6 +1,10 @@
 # Cowrie
 
-**Binance built the payment rail. Cowrie is the first buyer standing on it.**
+**An agent that buys software with stablecoins — for developers whose cards don't work.**
+
+Cowrie runs on **Base**, where 624 of the 659 services accepting x402 payments settle. It reads a
+seller's full price list before paying, refuses offers it cannot sign, and keeps one spending ledger
+across every chain it touches.
 
 Cowrie shells were West Africa's cross-border currency for centuries — money that worked across
 empires that agreed on nothing else.
