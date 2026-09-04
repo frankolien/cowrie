@@ -14,6 +14,7 @@ import "./env.ts";
 import {
   search,
   cheapestPayable,
+  cheapestInference,
   railCoverage,
   networkTotals,
   type DiscoveredService,
@@ -139,13 +140,18 @@ const pool = args.paidOnly
   ? services.filter((s) => (s.minPriceUsd ?? 0) > 0)
   : services;
 
+// Without --body we send an OpenAI-style chat request, so we must route to something that speaks
+// it. The cheapest service overall is frequently not one: paying a contract auditor for a chat
+// completion buys a 404 at full price.
 const chosen = args.service
   ? pool.find(
       (s) =>
         s.slug === args.service ||
         s.name.toLowerCase().includes(args.service!.toLowerCase()),
     )
-  : cheapestPayable(pool, candidateRails);
+  : args.body
+    ? cheapestPayable(pool, candidateRails)
+    : cheapestInference(pool, candidateRails);
 
 if (!chosen) {
   console.error(

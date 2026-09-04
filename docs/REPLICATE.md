@@ -106,7 +106,18 @@ node src/receipts.ts
 buyer only signs (`address` + `signTypedData`), and the facilitator submits the transaction and
 pays the gas. A wallet holding nothing but USDC can buy.
 
-### Then, on mainnet
+### Then, on mainnet — confirmed working
+
+XFuel settles on Base mainnet for $0.002 a call and returns Llama 3.3 70B:
+
+```bash
+node src/index.ts --paid-only --service XFuel "In one sentence: what is HTTP 402?"
+```
+
+Note that not every seller behaves the same. GPUOps advertises $0.001 and its facilitator rejected
+our payment; XFuel took it first try. **Quote and try — a listing is not a guarantee.**
+
+### Mainnet, generally
 
 Same command without `--network`. At $0.001–0.004 a call, **one dollar buys several hundred runs**:
 

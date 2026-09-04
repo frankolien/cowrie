@@ -243,12 +243,17 @@ export async function buy(args: {
     );
   }
 
-  // Facilitators send this as `payment-response` (x402 v2). Some older servers prefix it with
-  // `x-`, so check both. Its absence is not an error: a free endpoint answers 200 with no payment.
+  // Facilitators send this as `payment-response` (x402 v2); some older servers prefix it `x-`.
   const header = res.headers.get("payment-response") ?? res.headers.get("x-payment-response");
   const settled = header ? decodeSettlement(header) : undefined;
 
-  if (settled?.success && selected) {
+  // Not every seller returns that header. XFuel answers 200 with no settlement header at all, and
+  // the money still leaves the wallet — a payment that succeeds silently is exactly the hole this
+  // ledger exists to close. So: if a requirement was selected and the response is not a 402, the
+  // payment went through. Record it, with the transaction hash if the seller bothered to send one.
+  const paid = selected !== undefined && res.status !== 402;
+
+  if (paid) {
     const chosen = selected as { network: string; asset: string; amountAtomic: string; amountUsd: number };
     const rail = railFromNetwork(chosen.network);
     await args.ledger.record(
@@ -260,7 +265,7 @@ export async function buy(args: {
         asset: chosen.asset,
         amountAtomic: chosen.amountAtomic,
         amountUsd: chosen.amountUsd,
-        txHash: settled.txHash,
+        txHash: settled?.txHash,
         purpose: args.purpose,
       }),
     );

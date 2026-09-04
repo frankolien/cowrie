@@ -129,7 +129,7 @@ registration.
 |---|---|
 | Discovery, quoting, rail-aware routing | working, against the live directory |
 | Signable-offer filtering, budget ceiling, receipts | working |
-| **Settled payments** | **proven on Base Sepolia — real transaction hashes** |
+| **Settled payments** | **live on Base mainnet** — real USDC, real inference; also proven on Base Sepolia with on-chain tx hashes |
 | Binance Agent OS OAuth client | working; needs one browser consent |
 | MCP server, 7 tools | working |
 | Typecheck | clean |
