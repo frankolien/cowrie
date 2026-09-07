@@ -176,6 +176,27 @@ Let all five stages print.
 
 ---
 
+### Shot 4b — the fallback (record this, it is better than a clean run)
+
+```bash
+node src/index.ts --paid-only "In one sentence: what is HTTP 402?"
+```
+
+```
+  GPUOps AI Inference — $0.001/call
+  GPUOps AI Inference refused the payment — its facilitator rejected the signature.
+
+  trying XFuel instead — $0.002/call
+
+HTTP 402 is a status code that indicates "Payment Required"...
+
+  $0.0040 spent today · $19.9960 left
+```
+
+The cheapest seller's facilitator rejects our signature; Cowrie moves to the next one and completes
+the purchase. **Do not re-record to get a clean single purchase** — a buyer that survives a bad
+seller is a better demonstration than one that got lucky.
+
 ### Shot 5 · 0:55–1:08 — Proof
 
 ```bash

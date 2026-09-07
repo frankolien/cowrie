@@ -143,17 +143,27 @@ const pool = args.paidOnly
 // Without --body we send an OpenAI-style chat request, so we must route to something that speaks
 // it. The cheapest service overall is frequently not one: paying a contract auditor for a chat
 // completion buys a 404 at full price.
-const chosen = args.service
-  ? pool.find(
+//
+// This is a ranked list, not a single pick. A listing is not a promise: GPUOps advertises $0.001
+// and its facilitator refuses our payments, while XFuel two cents up the list takes them first
+// try. A buyer that gives up on the cheapest seller's bad day is not much of a buyer.
+const fundedIds = new Set(candidateRails.map((r) => r.id));
+const candidates = args.service
+  ? pool.filter(
       (s) =>
         s.slug === args.service ||
         s.name.toLowerCase().includes(args.service!.toLowerCase()),
     )
-  : args.body
-    ? cheapestPayable(pool, candidateRails)
-    : cheapestInference(pool, candidateRails);
+  : pool
+      .filter((s) => (args.body ? true : s.openAiCompatible))
+      .filter((s) => s.rails.some((r) => fundedIds.has(r.id)))
+      .filter((s) => s.minPriceUsd !== undefined)
+      // Never queue a seller we are not allowed to pay. The per-payment cap would reject it at
+      // signing time anyway; trying it just burns a round trip and muddies the output.
+      .filter((s) => (s.minPriceUsd ?? 0) <= args.maxUsd)
+      .sort((a, b) => (a.minPriceUsd ?? 0) - (b.minPriceUsd ?? 0));
 
-if (!chosen) {
+if (candidates.length === 0) {
   console.error(
     args.service
       ? `No service matching "${args.service}". Try --list.`
@@ -161,6 +171,8 @@ if (!chosen) {
   );
   process.exit(1);
 }
+
+const chosen = candidates[0]!;
 
 const preferRail = args.network ? railFromAbbrev(args.network) : undefined;
 if (args.network && !preferRail) {
@@ -175,34 +187,59 @@ if (args.dryRun || funded.length === 0) {
 }
 
 // Most AI services here are OpenAI-compatible; --path overrides for those that aren't.
-const endpoint = `${chosen.baseUrl}${args.path ?? "/v1/chat/completions"}`;
-
 const requestBody =
   args.body ??
   JSON.stringify({ model: "auto", messages: [{ role: "user", content: args.prompt }] });
 
-const res = await buy({
-  url: endpoint,
-  init: {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: requestBody,
-  },
-  service: chosen.name,
-  purpose: args.prompt.slice(0, 80),
-  ledger,
-  maxPerPaymentUsd: args.maxUsd,
-  preferRail,
-});
+let answered = false;
 
-if (!res.ok) {
-  console.error(`\n  ${chosen.name} returned ${res.status} ${res.statusText}`);
-  console.error(`  ${(await res.text()).slice(0, 400)}`);
+for (const [i, service] of candidates.slice(0, 4).entries()) {
+  if (i > 0) {
+    console.log(`\n  trying ${service.name} instead — $${service.minPriceUsd}/call`);
+  }
+
+  const endpoint = `${service.baseUrl}${args.path ?? "/v1/chat/completions"}`;
+
+  try {
+    const res = await buy({
+      url: endpoint,
+      init: {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: requestBody,
+      },
+      service: service.name,
+      purpose: args.prompt.slice(0, 80),
+      ledger,
+      maxPerPaymentUsd: args.maxUsd,
+      preferRail,
+    });
+
+    if (res.status === 402) {
+      // The seller would not take our money. Nothing settled, so moving on costs nothing.
+      console.log(`  ${service.name} refused the payment — its facilitator rejected the signature.`);
+      continue;
+    }
+
+    if (!res.ok) {
+      console.log(`  ${service.name} returned ${res.status} ${res.statusText}`);
+      continue;
+    }
+
+    const payload = (await res.json()) as {
+      choices?: { message?: { content?: string } }[];
+    };
+    console.log(`\n${payload.choices?.[0]?.message?.content ?? JSON.stringify(payload).slice(0, 500)}`);
+    answered = true;
+    break;
+  } catch (err) {
+    console.log(`  ${service.name}: ${err instanceof Error ? err.message : String(err)}`);
+  }
+}
+
+if (!answered) {
+  console.error("\n  No seller completed the purchase. Run --list to see what else is available.");
   process.exit(1);
 }
 
-const payload = (await res.json()) as {
-  choices?: { message?: { content?: string } }[];
-};
-console.log(`\n${payload.choices?.[0]?.message?.content ?? JSON.stringify(payload).slice(0, 500)}`);
 console.log(`\n  $${ledger.spentTodayUsd.toFixed(4)} spent today · $${ledger.remainingUsd.toFixed(4)} left`);
